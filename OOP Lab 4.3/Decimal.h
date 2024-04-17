@@ -3,21 +3,20 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-class Decimal : Array {
-	unsigned char digits[MAX_SIZE];
+class Decimal : public Array {
 public: 
 	Decimal() : Array(0) {
 		for (int i = 0; i < size; i++) {
-			digits[i] = 0;
+			bits[i] = 0;
 		}
 	}
-	Decimal(int size) : Array(size) { std::fill_n(digits, MAX_SIZE, 0); }
+	Decimal(int size) : Array(size) { std::fill_n(bits, MAX_SIZE, 0); }
 	Decimal(const std::string& value) : Array(value.size()) {
 		for (int i = 0; i < size; ++i) {
 			if (value[i] < '0' || value[i] > '9') {
 				throw std::invalid_argument("Invalid decimal string");
 			}
-			digits[i] = value[i] - '0';
+			bits[i] = value[i] - '0';
 		}
 	}
 	int getSize() const override;

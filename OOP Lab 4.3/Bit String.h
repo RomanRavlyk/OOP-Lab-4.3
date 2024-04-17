@@ -6,8 +6,6 @@
 using namespace std;
 
 class BitString: public Array {
-private:
-	unsigned char bits[MAX_SIZE / 8 + 1];
 public:
 	BitString() : Array(0) {}
 	BitString(int size): Array(size) {}

@@ -6,6 +6,7 @@ class Array {
 protected:
 	static const int MAX_SIZE = 100;
 	int size;
+	unsigned char bits[MAX_SIZE];
 public:
 	Array() : size(0) {};
 	Array(int size) : size(size) {};

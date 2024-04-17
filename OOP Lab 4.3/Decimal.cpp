@@ -18,14 +18,14 @@ Decimal operator+(const Decimal& a, const Decimal& b) {
     int carry = 0;
     for (int i = 0; i < std::max(a.size, b.size) || carry; ++i) {
         int sum = carry;
-        if (i < a.size) sum += a.digits[i];
-        if (i < b.size) sum += b.digits[i];
-        result.digits[i] = sum % 10;
+        if (i < a.size) sum += a.bits[i];
+        if (i < b.size) sum += b.bits[i];
+        result.bits[i] = sum % 10;
         carry = sum / 10;
     }
     result.size = std::max(a.size, b.size);
     if (carry) {
-        result.digits[result.size++] = carry;
+        result.bits[result.size++] = carry;
     }
     return result;
 }
@@ -34,8 +34,8 @@ Decimal operator-(const Decimal& a, const Decimal& b) {
     Decimal result;
     int borrow = 0;
     for (int i = 0; i < a.size; ++i) {
-        int diff = a.digits[i] - borrow;
-        if (i < b.size) diff -= b.digits[i];
+        int diff = a.bits[i] - borrow;
+        if (i < b.size) diff -= b.bits[i];
         if (diff < 0) {
             diff += 10;
             borrow = 1;
@@ -43,9 +43,9 @@ Decimal operator-(const Decimal& a, const Decimal& b) {
         else {
             borrow = 0;
         }
-        result.digits[i] = diff;
+        result.bits[i] = diff;
     }
-    while (result.size > 1 && result.digits[result.size - 1] == 0) {
+    while (result.size > 1 && result.bits[result.size - 1] == 0) {
         --result.size;
     }
     return result;
@@ -56,20 +56,20 @@ Decimal operator*(const Decimal& a, const Decimal& b) {
     for (int i = 0; i < a.size; ++i) {
         int carry = 0;
         for (int j = 0; j < b.size || carry; ++j) {
-            int mul = result.digits[i + j] + a.digits[i] * (j < b.size ? b.digits[j] : 0) + carry;
-            result.digits[i + j] = mul % 10;
+            int mul = result.bits[i + j] + a.bits[i] * (j < b.size ? b.bits[j] : 0) + carry;
+            result.bits[i + j] = mul % 10;
             carry = mul / 10;
         }
     }
     result.size = a.size + b.size;
-    while (result.size > 1 && result.digits[result.size - 1] == 0) {
+    while (result.size > 1 && result.bits[result.size - 1] == 0) {
         --result.size;
     }
     return result;
 }
 
 Decimal operator/(const Decimal& a, const Decimal& b) {
-    if (b.size == 1 && b.digits[0] == 0) {
+    if (b.size == 1 && b.bits[0] == 0) {
         throw std::runtime_error("Division by zero");
     }
 
@@ -82,24 +82,24 @@ Decimal operator/(const Decimal& a, const Decimal& b) {
             remainder = remainder - b;
             ++count;
         }
-        quotient.digits[i] = count;
+        quotient.bits[i] = count;
     }
 
     quotient.size = a.size;
-    while (quotient.size > 1 && quotient.digits[quotient.size - 1] == 0) {
+    while (quotient.size > 1 && quotient.bits[quotient.size - 1] == 0) {
         --quotient.size;
     }
     return quotient;
 }
 
 Decimal operator%(const Decimal& a, const Decimal& b) {
-    if (b.size == 1 && b.digits[0] == 0) {
+    if (b.size == 1 && b.bits[0] == 0) {
         throw std::runtime_error("Division by zero");
     }
 
     Decimal remainder = a;
     for (int i = a.size - 1; i >= 0; --i) {
-        remainder = remainder * 10 + Decimal(std::to_string(a.digits[i]));
+        remainder = remainder * 10 + Decimal(std::to_string(a.bits[i]));
         int count = 0;
         while (remainder >= b) {
             remainder = remainder - b;
@@ -113,7 +113,7 @@ Decimal operator%(const Decimal& a, const Decimal& b) {
 bool operator==(const Decimal& a, const Decimal& b) {
     if (a.size != b.size) return false;
     for (int i = 0; i < a.size; ++i) {
-        if (a.digits[i] != b.digits[i]) return false;
+        if (a.bits[i] != b.bits[i]) return false;
     }
     return true;
 }
@@ -125,7 +125,7 @@ bool operator!=(const Decimal& a, const Decimal& b) {
 bool operator<(const Decimal& a, const Decimal& b) {
     if (a.size != b.size) return a.size < b.size;
     for (int i = a.size - 1; i >= 0; --i) {
-        if (a.digits[i] != b.digits[i]) return a.digits[i] < b.digits[i];
+        if (a.bits[i] != b.bits[i]) return a.bits[i] < b.bits[i];
     }
     return false;
 }
@@ -151,13 +151,13 @@ std::ostream& operator << (ostream& out, const Decimal& r)
 Decimal::operator std::string() const {
     std::stringstream ss;
     for (int i = size - 1; i >= 0; --i) {
-        ss << static_cast<int>(digits[i]);
+        ss << static_cast<int>(bits[i]);
     }
     return ss.str();
 }
 
 bool Decimal::operator [](int index) const {
-    return digits[index] > 0;
+    return bits[index] > 0;
 }
 
 Decimal& Decimal::operator=(const Array& other) {
@@ -165,7 +165,7 @@ Decimal& Decimal::operator=(const Array& other) {
         size = other.getSize();
         const Decimal& temp = dynamic_cast<const Decimal&>(other);
         for (int i = 0; i < size; ++i) {
-            digits[i] = temp.digits[i];
+            bits[i] = temp.bits[i];
         }
     }
     return *this;
@@ -173,6 +173,6 @@ Decimal& Decimal::operator=(const Array& other) {
 
 void Decimal::display() const{
     for (int i = 0; i < size; i++) {
-        cout << digits[i];
+        cout << bits[i];
     }
 }
